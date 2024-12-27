@@ -23,7 +23,7 @@ class Task(models.Model):
         ('done', 'Done'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    users = models.ManyToManyField(User)    
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='todo')
