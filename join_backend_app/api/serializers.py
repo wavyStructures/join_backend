@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Task, Contact, Board
+from join_backend_app.models import User, Task, Contact, Board
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
