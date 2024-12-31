@@ -15,6 +15,19 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Firebase configuration
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# Firebase credentials
+FIREBASE_CREDENTIALS = 'path/to/your/firebase-service-account-key.json'
+
+# Initialize Firebase Admin
+cred = credentials.Certificate(FIREBASE_CREDENTIALS)
+firebase_admin.initialize_app(cred)
+
+# Firestore client
+FIRESTORE_DB = firestore.client()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
