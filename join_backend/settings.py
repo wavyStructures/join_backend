@@ -18,9 +18,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Firebase configuration
 import firebase_admin
 from firebase_admin import credentials, firestore
+import os
 
 # Firebase credentials
-FIREBASE_CREDENTIALS = 'path/to/your/firebase-service-account-key.json'
+FIREBASE_CREDENTIALS = os.getenv('FIREBASE_CREDENTIALS')
+
+print(FIREBASE_CREDENTIALS)
+if not FIREBASE_CREDENTIALS:
+    raise ValueError("FIREBASE_CREDENTIALS environment variable is not set")
 
 # Initialize Firebase Admin
 cred = credentials.Certificate(FIREBASE_CREDENTIALS)
