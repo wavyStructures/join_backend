@@ -1,11 +1,21 @@
+
 from rest_framework import generics
+from rest_framework.decorators import api_view
+
 from user_auth_app.models import UserProfile
-from .serializers import UserProfileSerializer, RegistrationSerializer
+from user_auth_app.api.serializers import UserProfileSerializer, RegistrationSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken  
+
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from rest_framework import status
+
 
 class UserProfileList(generics.ListCreateAPIView):
     queryset = UserProfile.objects.all()
@@ -23,33 +33,37 @@ class RegistrationView(APIView):
         
         if serializer.is_valid():
             saved_account = serializer.save()
+            
             token, created = Token.objects.get_or_create(user=saved_account)
+                                
             data = {
                 'token': token.key,
                 'username': saved_account.username,
                 'email': saved_account.email,
             }
+           
         else:
             data = serializer.errors 
  
         return Response(data)
-
-class CustomLoginView(ObteinAuthToken):
-    permission_classes = [AllowAny]
     
-    def post(self, request):
-        serializer = self.serializer(data=request.data)
-        
-        if serializer.is_valid():
-            user = serializer.validated_data['user'] q
-            token, created = Token.objects.get_or_create(user=user)
-            data = {
-                'token': token.key,
-                'username': saved_account.username,
-                'email': saved_account.email,
-            }
-        else:
-            data = serializer.errors 
- 
-        return Response(data)
-  
+# JWT Login View
+@api_view(['POST'])
+def login_user(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    # Authenticate user
+    user = authenticate(username=username, password=password)
+
+    if user:
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }, status=status.HTTP_200_OK)
+
+    return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+

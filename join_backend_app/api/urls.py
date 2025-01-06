@@ -1,13 +1,22 @@
 from django.urls import path, include
-from rest_framework import routers
-from .views import UserViewSet, TaskViewSet, ContactViewSet, BoardViewSet
-
-router = routers.DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'tasks', TaskViewSet)
-router.register(r'contacts', ContactViewSet)
-router.register(r'boards', BoardViewSet)
+from django.contrib import admin
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path('admin/', admin.site.urls),
+    path('auth/api/', include('user_auth_app.api.urls')),
+    path('join/api/', include('join_backend_app.api.urls')),
 ]
+
+
+
+
+
+
+
+
+
+# from .views import UserList, UserDetail, TaskList, TaskDetail, ContactList, ContactDetail, BoardViewSet
+
+# urlpatterns = [
+#     path('user-list/', UserList.as_view(), name='user-list'),
+# ]
