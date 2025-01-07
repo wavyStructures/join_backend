@@ -13,8 +13,8 @@ class Task(models.Model):
     users_assigned_to = models.ManyToManyField(UserProfile)    
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
-    priority = models.IntegerField()  
-    category = models.CharField(max_length=100)
+    priority = models.IntegerField(default="2")  
+    category = models.CharField(max_length=255, default="general")  
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='todo')
     due_date = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -31,6 +31,7 @@ class Contact(models.Model):
 
     def __str__(self):
         return self.name
+
 
 # class Board(models.Model):
 #     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='boards')

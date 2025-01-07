@@ -47,23 +47,27 @@ class RegistrationView(APIView):
  
         return Response(data)
     
-# JWT Login View
-@api_view(['POST'])
-def login_user(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
 
-    # Authenticate user
-    user = authenticate(username=username, password=password)
+class CustomLoginView(APIView):
+    permission_classes = [AllowAny]
 
-    if user:
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }, status=status.HTTP_200_OK)
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
 
-    return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        # Authenticate user
+        user = authenticate(username=username, password=password)
 
+        if user:
+            # Generate or retrieve token for authenticated user
+            token, created = Token.objects.get_or_create(user=user)
+            data = {
+                'token': token.key,
+                'username': user.username,
+                'email': user.email,
+            }
+            return Response(data, status=status.HTTP_200_OK)
 
+        # Return error for invalid credentials
+        return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 

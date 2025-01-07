@@ -16,10 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from user_auth_app.api.views import login_user
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('join_backend_app.api.urls')),  # API routes
-    path('api/login/', login_user, name='login'), 
-]
+    # path('join/api/', include('join_backend_app.api.urls')),  
+    path('auth/api/', include('user_auth_app.api.urls')),  
+    ]    
