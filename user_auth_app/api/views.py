@@ -11,7 +11,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken  
 
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import status
@@ -49,7 +48,6 @@ class RegistrationView(APIView):
     
 
 class CustomLoginView(APIView):
-    permission_classes = [AllowAny]
 
     def post(self, request):
         username = request.data.get('username')
@@ -59,7 +57,6 @@ class CustomLoginView(APIView):
         user = authenticate(username=username, password=password)
 
         if user:
-            # Generate or retrieve token for authenticated user
             token, created = Token.objects.get_or_create(user=user)
             data = {
                 'token': token.key,
@@ -68,6 +65,5 @@ class CustomLoginView(APIView):
             }
             return Response(data, status=status.HTTP_200_OK)
 
-        # Return error for invalid credentials
         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 

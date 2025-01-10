@@ -15,24 +15,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# # Firebase configuration
-# import firebase_admin
-# from firebase_admin import credentials, firestore
-# import os
 
-# # Firebase credentials
-# FIREBASE_CREDENTIALS = os.getenv('FIREBASE_CREDENTIALS')
-
-# print(FIREBASE_CREDENTIALS)
-# if not FIREBASE_CREDENTIALS:
-#     raise ValueError("FIREBASE_CREDENTIALS environment variable is not set")
-
-# # Initialize Firebase Admin
-# cred = credentials.Certificate(FIREBASE_CREDENTIALS)
-# firebase_admin.initialize_app(cred)
-
-# # Firestore client
-# FIRESTORE_DB = firestore.client()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -59,9 +42,11 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'join_backend_app',
     'user_auth_app',  
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -70,6 +55,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# CORS_ALLOWED_ORIGINS = [
+#     "http://127.0.0.1:5501",  # Add the origin of your frontend
+# ]
 
 ROOT_URLCONF = 'join_backend.urls'
 
@@ -121,6 +110,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'user_auth_app.CustomUser'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -147,11 +138,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         # 'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-        'rest_framework.permissions.IsAuthenticated',
-        # 'rest_framework.permissions.AllowAny',
+        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
 }
+
+# LOGIN_REDIRECT_URL = '/api/auth/login/'
 

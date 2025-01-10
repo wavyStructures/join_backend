@@ -16,6 +16,8 @@ class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
         fields = '__all__'
+        read_only_fields = ['user']
+
 
 # class BoardSerializer(serializers.ModelSerializer):
 #     class Meta:

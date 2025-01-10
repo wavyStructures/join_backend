@@ -1,6 +1,7 @@
 from django.db import models
 from user_auth_app.models import UserProfile
 
+
 # Create your models here.
     
 class Task(models.Model):
@@ -23,14 +24,27 @@ class Task(models.Model):
         return self.title
 
 class Contact(models.Model):
+    name = models.CharField(max_length=100, default="Max Mustermann")
+    mail = models.CharField(max_length=100, default="Max@Musteremail.de")
+    phone = models.CharField(max_length=100, default="012345678")
+    # initials = models.CharField(max_length=5, default="MM")
+    contactColor = models.CharField(max_length=20, default="#FF7A00")
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='contacts')
-    name = models.CharField(max_length=255)
-    email = models.EmailField()
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    # user = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='contacts')
 
+    # created_at = models.DateTimeField(auto_now_add=True)
+    
+    #  def save(self, *args, **kwargs):
+    #     # Automatically generate initials if not provided
+    #     if not self.short:
+    #         self.short = ''.join([part[0] for part in self.name.split()[:2]]).upper()
+    #     super(ContactModel, self).save(*args, **kwargs)
+   
     def __str__(self):
-        return self.name
+        return f'({self.id}) {self.name}'
+    
+
+
 
 
 # class Board(models.Model):
