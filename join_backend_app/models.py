@@ -29,3 +29,4 @@ class Contact(models.Model):
 
     def __str__(self):
         return f"{self.user.email if self.user else 'No User'}"
+    
