@@ -23,10 +23,12 @@ class Task(models.Model):
 
 # Contact model
 class Contact(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='contact', null=True)
+    users = models.ManyToManyField(User, related_name='contacts')  
     additional_info = models.CharField(max_length=255, blank=True, null=True)
-    color = models.CharField(max_length=7, blank=True, null=True)
+    contactColor = models.CharField(max_length=7, blank=True, null=True)
+    username = models.CharField(max_length=100, blank=True, null=True)  
+    phone = models.CharField(max_length=20, blank=True, null=True)  
 
     def __str__(self):
-        return f"{self.user.email if self.user else 'No User'}"
-    
+        return f"Contact: {self.username if self.username else 'No Username'}"
+

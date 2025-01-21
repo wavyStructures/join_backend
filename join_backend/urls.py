@@ -23,3 +23,8 @@ urlpatterns = [
     path('auth/', include('user_auth_app.api.urls')), 
     path('auth-api/', include('rest_framework.urls')),
 ]
+
+
+
+
+

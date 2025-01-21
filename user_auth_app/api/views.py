@@ -28,7 +28,7 @@ class CustomUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get(self, request, *args, **kwargs):
         user = self.get_object()  
 
-        if user != request.user:
+        if not request.user.is_superuser and user != request.user:
             return Response({"detail": "You are not authorized to view this user's details."}, status=403)
         
         serializer = self.get_serializer(user)
@@ -37,6 +37,7 @@ class CustomUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     
 class SignUpView(APIView):
     permission_classes = (AllowAny,)
+    
     def post(self, request, *args, **kwargs):
         print("Request received with data:", request.data)
         serializer = SignUpSerializer(data=request.data)
@@ -68,7 +69,34 @@ class CheckEmailView(APIView):
         return Response({'exists': exists})
 
 
+class LoginView(APIView):
+    permission_classes = [AllowAny]
 
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        email = data.get('email')
+        password = data.get('password')
+
+        if not email or not password:
+            return Response({'error': 'Both email and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.filter(email=email).first()
+        
+        if user is None or not user.check_password(password):
+            return Response({'error': 'Invalid email or password.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        token, created = Token.objects.get_or_create(user=user)
+
+        return Response({
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "phone": user.phone,
+            },
+            "token": token.key,  # Send the token to the frontend
+        }, status=status.HTTP_200_OK)
+        
 class HelloView(APIView):
     def get(self, request):
         content = {'message': 'Hello, World!'}

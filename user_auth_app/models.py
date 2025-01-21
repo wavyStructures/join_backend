@@ -11,6 +11,8 @@ class CustomUser(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+    
+    # objects = CustomUserManager()
 
     # def update_activity(self):
     #     self.last_activity = now()

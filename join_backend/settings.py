@@ -29,8 +29,9 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'user_auth_app.CustomUser'
 
-# Application definition
+from corsheaders.defaults import default_headers  
 
+# Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -53,7 +54,18 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Add CorsMiddleware at the top
 ]
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'Authorization',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5501",
+]
+
+CORS_ORIGIN_ALLOW_ALL = True  # Use with caution in development
 
 ROOT_URLCONF = 'join_backend.urls'
 
@@ -131,7 +143,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
 
     ],
     'DEFAULT_PERMISSION_CLASSES': [
