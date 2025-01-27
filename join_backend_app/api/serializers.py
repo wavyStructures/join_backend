@@ -16,5 +16,5 @@ class TaskSerializer(serializers.ModelSerializer):
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
-        fields = ['id', 'username', 'phone', 'email', 'contactColor', 'contact_is_a_user']
+        fields = '__all__'
 

@@ -5,7 +5,7 @@ from join_backend_app.models import Task, Contact
 from .serializers import TaskSerializer, ContactSerializer
 from user_auth_app.api.serializers import CustomUserSerializer
 from django.contrib.auth import get_user_model
-
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 
 User = get_user_model()
@@ -38,7 +38,7 @@ class ContactListCreateView(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
-class ContactDetailView(generics.RetrieveUpdateAPIView):
+class ContactDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
     permission_classes = [IsGuestOrReadOnly]
@@ -53,7 +53,11 @@ class ContactDetailView(generics.RetrieveUpdateAPIView):
             raise PermissionDenied("Guests cannot update contacts.")
         serializer.save(user=self.request.user)
 
-
+    @action(detail=True, methods=['delete'])
+    def delete_contact(self, request, pk=None):
+        contact = self.get_object()
+        contact.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # Contact Views
 # class ContactListCreateView(generics.ListCreateAPIView):
