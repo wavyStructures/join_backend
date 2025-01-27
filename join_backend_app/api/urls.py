@@ -5,7 +5,7 @@ urlpatterns = [
     path('tasks/', TaskListCreateView.as_view(), name='task-list-create'),
     path('tasks/<int:pk>/', TaskDetailView.as_view(), name='task-detail'),
 
-    path('contact/', ContactDetailView.as_view(), name='contact-detail'),
     path('contacts/', ContactListCreateView.as_view(), name='contact-list-create'),
     path('user-contacts/', ContactListCreateView.as_view(), name='user-contacts'),
+    path('contacts/<int:pk>/', ContactDetailView.as_view(), name='contact-detail'),
 ]

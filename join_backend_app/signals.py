@@ -15,4 +15,4 @@ def add_user_to_contacts(sender, instance, created, **kwargs):
     if created:
         # For each user in the system (excluding the newly created user), add them as a contact
         for user in User.objects.exclude(id=instance.id):
-            Contact.objects.get_or_create(user=user, additional_info=instance.email)  # Assuming email is used as additional info
+            Contact.objects.get_or_create(user=user, email=instance.email) 

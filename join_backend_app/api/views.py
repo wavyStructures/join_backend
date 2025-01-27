@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions
+from .permissions import IsGuestOrReadOnly  
 
 from join_backend_app.models import Task, Contact
 from .serializers import TaskSerializer, ContactSerializer
@@ -22,6 +23,37 @@ class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class ContactListCreateView(generics.ListCreateAPIView):
+    serializer_class = ContactSerializer
+    permission_classes = [IsGuestOrReadOnly]  
+
+    def get_queryset(self):
+        return Contact.objects.all()
+
+    def perform_create(self, serializer):
+        if self.request.user.is_guest:
+            raise PermissionDenied("Guests cannot create contacts.")
+        serializer.save(user=self.request.user)
+
+
+class ContactDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Contact.objects.all()
+    serializer_class = ContactSerializer
+    permission_classes = [IsGuestOrReadOnly]
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            return Contact.objects.all()
+        return Contact.objects.filter(is_public=True)
+
+    def perform_update(self, serializer):
+        if self.request.user.is_guest:
+            raise PermissionDenied("Guests cannot update contacts.")
+        serializer.save(user=self.request.user)
+
+
 
 # Contact Views
 # class ContactListCreateView(generics.ListCreateAPIView):
@@ -53,29 +85,3 @@ class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 #         else:
 #             raise ValidationError("You must provide either a registered user or additional info.")
-
-class ContactListCreateView(generics.ListCreateAPIView):
-    serializer_class = ContactSerializer
-
-    def get_queryset(self):
-        """
-        Return contacts associated with the current authenticated user.
-        """
-        return Contact.objects.filter(users=self.request.user)
-
-    def perform_create(self, serializer):
-        """
-        Add the contact and associate it with the current user.
-        """
-        contact = serializer.save()
-        contact.users.add(self.request.user) 
-
-
-class ContactDetailView(generics.RetrieveUpdateAPIView):
-    queryset = Contact.objects.all()
-    serializer_class = ContactSerializer
-
-    def get_queryset(self):
-        return Contact.objects.filter(user=self.request.user)
-    
-

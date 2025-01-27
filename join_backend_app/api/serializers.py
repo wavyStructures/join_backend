@@ -12,20 +12,9 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = '__all__'
 
-class ContactSerializer(serializers.ModelSerializer):
-    users = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), many=True)  
 
+class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
-        fields = ['id', 'users', 'additional_info', 'contactColor', 'username', 'phone']
-
-    def validate(self, attrs):
-        """
-        Validate that at least one user or additional info is provided.
-        """
-        if not attrs.get('users') and not attrs.get('additional_info'):
-            raise serializers.ValidationError("You must provide either associated users or additional info.")
-        return attrs
-
-
+        fields = ['id', 'username', 'phone', 'email', 'contactColor', 'contact_is_a_user']
 
