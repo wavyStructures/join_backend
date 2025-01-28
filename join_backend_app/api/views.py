@@ -24,7 +24,7 @@ class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-
+# Contact Views
 class ContactListCreateView(generics.ListCreateAPIView):
     serializer_class = ContactSerializer
     permission_classes = [IsGuestOrReadOnly]  
