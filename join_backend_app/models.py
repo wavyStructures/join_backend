@@ -26,17 +26,46 @@ class Contact(models.Model):
 
 # Task model
 class Task(models.Model):
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    status_choices = [
+    STATUS_CHOICES = [
         ('todo', 'To Do'),
         ('in_progress', 'In Progress'),
         ('done', 'Done'),
     ]
-    status = models.CharField(max_length=20, choices=status_choices, default='todo')
+
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+        ('urgent', 'Urgent'),
+    ]
+
+    TYPE_CHOICES = [
+        ('technical_task', 'Technical Task'),
+        ('management_task', 'Management Task'),
+        ('design_task', 'Design Task'),
+        ('user_story', 'User Story'),
+    ]
+
+    CATEGORY_CHOICES = [
+        ('category-0', 'Category 0'),
+        ('category-1', 'Category 1'),
+        ('category-2', 'Category 2'),
+        ('category-3', 'Category 3'),
+    ]
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
+    assigned_to = models.ManyToManyField(Contact, related_name='assigned_tasks')
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='category-1')
+    due_date = models.DateField(null=True, blank=True)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
+    task_type = models.CharField(max_length=20, choices=TYPE_CHOICES, null=True, blank=True)
 
     def __str__(self):
         return self.title
+    
+    

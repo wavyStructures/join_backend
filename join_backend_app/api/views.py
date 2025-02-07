@@ -1,29 +1,65 @@
 from rest_framework import generics, permissions
 from .permissions import IsGuestOrReadOnly  
+from rest_framework.permissions import IsAuthenticated
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 
 from join_backend_app.models import Task, Contact
 from .serializers import TaskSerializer, ContactSerializer
 from user_auth_app.api.serializers import CustomUserSerializer
 from django.contrib.auth import get_user_model
-from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 
 User = get_user_model()
 
 # Task Views
 class TaskListCreateView(generics.ListCreateAPIView):
-    queryset = Task.objects.all()
+    # queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
-
+    
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:  # Admins can see all tasks
+            return Task.objects.all()
+        return Task.objects.filter(assigned_to=user)
+    
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        assigned_to = self.request.data.get('assigned_to', [])  
+    
+        valid_users = User.objects.filter(id__in=assigned_to)
+        valid_contacts = Contact.objects.filter(id__in=assigned_to)
+        
+        if len(valid_users) + len(valid_contacts) != len(assigned_to):
+            raise ValidationError("Invalid users or contacts assigned.")
+
+        serializer.save(owner=self.request.user, assigned_to=valid_contacts)
 
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Task.objects.all()
+    # queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:  # Admins can see all tasks
+            return Task.objects.all()
+        return Task.objects.filter(assigned_to=user)
+
+class UserTasksView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.is_superuser:
+            tasks = Task.objects.all()
+        else:
+            tasks = Task.objects.filter(user=request.user)
+        
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data)
+             
 # Contact Views
 class ContactListCreateView(generics.ListCreateAPIView):
     serializer_class = ContactSerializer

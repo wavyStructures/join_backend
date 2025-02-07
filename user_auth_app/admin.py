@@ -7,7 +7,7 @@ from .models import CustomUser
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     # Add any fields you want to display in the admin list view
-    list_display = ('email', 'username', 'phone', 'is_staff', 'is_superuser', 'is_guest', 'color')
+    list_display = ('email', 'username', 'phone', 'is_staff', 'is_superuser', 'is_guest', 'contactColor')
     list_filter = ('is_staff', 'is_superuser', 'is_guest')
     search_fields = ('email', 'username', 'phone')
 
@@ -17,7 +17,7 @@ class CustomUserAdmin(UserAdmin):
     # Fields shown when editing a user in the admin
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('username', 'phone', 'color', 'is_guest')}),
+        ('Personal info', {'fields': ('username', 'phone', 'contactColor', 'is_guest')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )

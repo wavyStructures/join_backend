@@ -62,7 +62,9 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5500",
     "http://127.0.0.1:5501",
+    "http://127.0.0.1:5502",
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True  # Use with caution in development
