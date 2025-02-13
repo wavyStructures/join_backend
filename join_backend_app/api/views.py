@@ -18,13 +18,12 @@ User = get_user_model()
 
 # Task Views
 class TaskListCreateView(generics.ListCreateAPIView):
-    # queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
         user = self.request.user
-        if user.is_staff:  # Admins can see all tasks
+        if user.is_staff:  
             return Task.objects.all()
 
         user_contact = get_object_or_404(Contact, email=user.email)
@@ -33,14 +32,11 @@ class TaskListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         assigned_to = self.request.data.get('assigned_to', [])  
     
-        # valid_users = User.objects.filter(id__in=assigned_to)
         valid_contacts = Contact.objects.filter(id__in=assigned_to)
         
-        # if len(valid_users) + len(valid_contacts) != len(assigned_to):
         if len(valid_contacts) != len(assigned_to):
             raise ValidationError("Invalid contacts assigned.")
 
-        # serializer.save(owner=self.request.user, assigned_to=valid_contacts)
         task = serializer.save(owner=self.request.user)
         task.assigned_to.set(valid_contacts) 
         
@@ -51,7 +47,7 @@ class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         user = self.request.user
         
-        if user.is_staff:  # Admins can see all tasks
+        if user.is_staff:  
             return Task.objects.all()
         
         user_contact = get_object_or_404(Contact, email=user.email)
@@ -62,38 +58,9 @@ class UserTasksView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
-          # Get the Contact instance for the logged-in user
         user_contact = get_object_or_404(Contact, email=self.request.user.email)
-        
-        # Return tasks where the user is one of the assigned contacts
         return Task.objects.filter(assigned_to=user_contact)
-        # user = self.request.user.email
-        # return Task.objects.filter(assigned_to=user)
-
-  
-    
-    
-#     permission_classes = [IsAuthenticated]
-
-#     def get(self, request):
-         
-#         try:
-#             if request.user.is_superuser:
-#                 tasks = Task.objects.all()
-#             else:
-#                 # Find the Contact instance linked to the logged-in user
-#                 contact = Contact.objects.filter(user=request.user).first()
-                
-#                 if not contact:
-#                     return Response({"error": "No contact found for this user."}, status=404)
-                
-#                 # Filter tasks where the contact is assigned OR the user is the owner
-#                 tasks = Task.objects.filter(Q(assigned_to=contact) | Q(owner=request.user)).distinct()
-            
-#             serializer = TaskSerializer(tasks, many=True)
-#             return Response(serializer.data)
-#         except Exception as e:
-#             return Response({'error': str(e)}, status=500)
+       
                  
 # Contact Views
 class ContactListCreateView(generics.ListCreateAPIView):
@@ -129,34 +96,3 @@ class ContactDetailView(generics.RetrieveUpdateDestroyAPIView):
         contact = self.get_object()
         contact.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-# Contact Views
-# class ContactListCreateView(generics.ListCreateAPIView):
-#     serializer_class = ContactSerializer
-
-#     def get_queryset(self):
-#         """
-#         Return all contacts for the authenticated user.
-#         """
-#         return Contact.objects.filter(user=self.request.user)
-
-#     def perform_create(self, serializer):
-#         """
-#         Handle creating a new contact. If it's a registered user, we automatically
-#         consider them a contact.
-#         If it's an unregistered contact, we save them with additional info.
-#         """
-#         contact_data = serializer.validated_data
-#         user = contact_data.get('user')  # The user field (if exists)
-#         additional_info = contact_data.get('additional_info')  # Extra info for unregistered contacts
-
-#         # Case 1: If it's an unregistered user (with additional info)
-#         if not user and additional_info:
-#             serializer.save(user=self.request.user, additional_info=additional_info)
-
-#         # Case 2: If it's a registered user, we don’t need to add them as contact manually because of the signal
-#         elif user:
-#             serializer.save(user=self.request.user)
-
-#         else:
-#             raise ValidationError("You must provide either a registered user or additional info.")
