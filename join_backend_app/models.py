@@ -1,12 +1,19 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-
+import random
 # Get the custom user model
 User = get_user_model()
 
 def get_default_user():
     default_user = User.objects.get(email="guest@example.com")
     return default_user.id 
+
+def generate_random_color():
+    colors = [
+        "#76b852", "#ff7043", "#ff3333", "#3399ff", "#ff6666",
+        "#33ccff", "#ff9933", "#66ff66", "#0059ff", "#a64dff"
+    ]
+    return random.choice(colors)
 
 # Contact model
 class Contact(models.Model):
@@ -18,10 +25,15 @@ class Contact(models.Model):
     contact_is_a_user = models.BooleanField(default=True)
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="contacts", default=get_default_user)
+    # assigned_to = models.ManyToManyField('self', symmetrical=False, blank=True)
 
+    def save(self, *args, **kwargs):
+        if not self.contactColor:
+            self.contactColor = generate_random_color()
+        super().save(*args, **kwargs)
+        
     def __str__(self):
         return f"Contact: {self.username if self.username else 'No Username'}"
-
 
 
 # Task model

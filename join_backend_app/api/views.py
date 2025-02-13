@@ -10,6 +10,8 @@ from rest_framework.exceptions import ValidationError
 from join_backend_app.models import Task, Contact
 from .serializers import TaskSerializer, ContactSerializer
 from user_auth_app.api.serializers import CustomUserSerializer
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -24,42 +26,75 @@ class TaskListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         if user.is_staff:  # Admins can see all tasks
             return Task.objects.all()
-        return Task.objects.filter(assigned_to=user)
+
+        user_contact = get_object_or_404(Contact, email=user.email)
+        return Task.objects.filter(assigned_to=user_contact)
     
     def perform_create(self, serializer):
         assigned_to = self.request.data.get('assigned_to', [])  
     
-        valid_users = User.objects.filter(id__in=assigned_to)
+        # valid_users = User.objects.filter(id__in=assigned_to)
         valid_contacts = Contact.objects.filter(id__in=assigned_to)
         
-        if len(valid_users) + len(valid_contacts) != len(assigned_to):
-            raise ValidationError("Invalid users or contacts assigned.")
+        # if len(valid_users) + len(valid_contacts) != len(assigned_to):
+        if len(valid_contacts) != len(assigned_to):
+            raise ValidationError("Invalid contacts assigned.")
 
-        serializer.save(owner=self.request.user, assigned_to=valid_contacts)
-
+        # serializer.save(owner=self.request.user, assigned_to=valid_contacts)
+        task = serializer.save(owner=self.request.user)
+        task.assigned_to.set(valid_contacts) 
+        
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
-    # queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
+        
         if user.is_staff:  # Admins can see all tasks
             return Task.objects.all()
-        return Task.objects.filter(assigned_to=user)
-
-class UserTasksView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        if request.user.is_superuser:
-            tasks = Task.objects.all()
-        else:
-            tasks = Task.objects.filter(user=request.user)
         
-        serializer = TaskSerializer(tasks, many=True)
-        return Response(serializer.data)
-             
+        user_contact = get_object_or_404(Contact, email=user.email)
+        return Task.objects.filter(assigned_to=user_contact)
+
+class UserTasksView(generics.ListAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+          # Get the Contact instance for the logged-in user
+        user_contact = get_object_or_404(Contact, email=self.request.user.email)
+        
+        # Return tasks where the user is one of the assigned contacts
+        return Task.objects.filter(assigned_to=user_contact)
+        # user = self.request.user.email
+        # return Task.objects.filter(assigned_to=user)
+
+  
+    
+    
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+         
+#         try:
+#             if request.user.is_superuser:
+#                 tasks = Task.objects.all()
+#             else:
+#                 # Find the Contact instance linked to the logged-in user
+#                 contact = Contact.objects.filter(user=request.user).first()
+                
+#                 if not contact:
+#                     return Response({"error": "No contact found for this user."}, status=404)
+                
+#                 # Filter tasks where the contact is assigned OR the user is the owner
+#                 tasks = Task.objects.filter(Q(assigned_to=contact) | Q(owner=request.user)).distinct()
+            
+#             serializer = TaskSerializer(tasks, many=True)
+#             return Response(serializer.data)
+#         except Exception as e:
+#             return Response({'error': str(e)}, status=500)
+                 
 # Contact Views
 class ContactListCreateView(generics.ListCreateAPIView):
     serializer_class = ContactSerializer

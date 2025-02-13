@@ -11,9 +11,7 @@ from user_auth_app.api.serializers import CustomUserSerializer, SignUpSerializer
 
 from django.contrib.auth import get_user_model
 
-
 User = get_user_model()
-
 
 class CustomUserListView(ListAPIView):
     queryset = CustomUser.objects.all()
@@ -34,28 +32,60 @@ class CustomUserDetailView(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(user)
         return Response(serializer.data)
     
-    
 class SignUpView(APIView):
     permission_classes = (AllowAny,)
-    
-    def post(self, request, *args, **kwargs):
-        print("Request received with data:", request.data)
-        serializer = SignUpSerializer(data=request.data)
-        
-        if serializer.is_valid():
-            custom_user = serializer.save()            
-            token, created = Token.objects.get_or_create(user=custom_user)
-            
-            return Response({
-                 "user": {
-                    "username": custom_user.username,
-                    "email": custom_user.email,
-                    "phone": custom_user.phone,
-                },
-                "token": token.key,  # Send the token to the frontend
-            }, status=status.HTTP_201_CREATED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, *args, **kwargs):
+        # Only for testing purposes, to see a form in the browser
+        return Response({
+            "username": "",
+            "email": "",
+            "password": ""
+        })
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = SignUpSerializer(data=request.data)
+            if serializer.is_valid():
+                custom_user = serializer.save()
+                token, created = Token.objects.get_or_create(user=custom_user)
+                return Response({
+                    "user": {
+                        "username": custom_user.username,
+                        "email": custom_user.email,
+                        "password": custom_user.password,
+                    },
+                    "token": token.key,
+                }, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import traceback
+            print("🚨 Server Error:", str(e))
+            print(traceback.format_exc())
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+# class SignUpView(APIView):
+#     permission_classes = (AllowAny,)
+    
+#     def post(self, request, *args, **kwargs):
+#         print("Request received with data:", request.data)
+#         serializer = SignUpSerializer(data=request.data)
+        
+#         if serializer.is_valid():
+#             custom_user = serializer.save()            
+#             token, created = Token.objects.get_or_create(user=custom_user)
+            
+#             return Response({
+#                  "user": {
+#                     "username": custom_user.username,
+#                     "email": custom_user.email,
+#                     "phone": custom_user.phone,
+#                 },
+#                 "token": token.key,  
+#             }, status=status.HTTP_201_CREATED)
+
+#         print("Validation errors:", serializer.errors)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
        
 class CheckEmailView(APIView):
     permission_classes = [AllowAny]  
@@ -97,6 +127,9 @@ class LoginView(APIView):
             "token": token.key,  # Send the token to the frontend
         }, status=status.HTTP_200_OK)
         
+
+
+
 class HelloView(APIView):
     def get(self, request):
         content = {'message': 'Hello, World!'}

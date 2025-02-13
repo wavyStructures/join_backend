@@ -10,9 +10,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'password', 'phone']  # Add fields specific to your custom user
-        extra_kwargs = {'password': {'write_only': True}}  # Ensure passwords are write-only
-
+        fields = ['username', 'email', 'password']  
+        extra_kwargs = {'password': {'write_only': True}}  
+        
     def create(self, validated_data):
-        # Use `create_user` to handle password hashing
         return CustomUser.objects.create_user(**validated_data)
