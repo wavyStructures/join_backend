@@ -12,16 +12,12 @@ def add_user_to_contacts(sender, instance, created, **kwargs):
     when a new user registers. Every user will have access to all contacts.
     """
     if created:
-        # Create a Contact for the new user if it doesn't exist
         new_contact, created = Contact.objects.get_or_create(username=instance.username, email=instance.email)
-        
-        # Assign all existing contacts to the new user
         existing_contacts = Contact.objects.exclude(user=instance)
         
         # Assign all existing contacts to the new user's contact list
         # new_contact.assigned_to.set(existing_contacts)
 
-        # Optionally, print to check if the contact was created and linked
         print(f"New contact created for {instance.username}, with {existing_contacts.count()} existing contacts.")
 
    

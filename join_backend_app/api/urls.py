@@ -11,3 +11,4 @@ urlpatterns = [
     path('user-contacts/', ContactListCreateView.as_view(), name='user-contacts'),
     path('contacts/<int:pk>/', ContactDetailView.as_view(), name='contact-detail'),
 ]
+

@@ -1,5 +1,5 @@
 from django.urls import path
-from user_auth_app.api.views import CustomUserListView, CustomUserDetailView, HelloView, SignUpView, CheckEmailView, LoginView
+from user_auth_app.api.views import CustomUserListView, CustomUserDetailView, SignUpView, CheckEmailView, LoginView
 from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
@@ -9,6 +9,5 @@ urlpatterns = [
     path('auth-api/token/', obtain_auth_token, name='token_obtain'),
     path('check-email/', CheckEmailView.as_view(), name='check-email'), 
     path('login/', LoginView.as_view(), name='login'),
-    path('hello/', HelloView.as_view(), name='hello'),
 ]
 

@@ -20,8 +20,7 @@ class CustomUserListView(ListAPIView):
 class CustomUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         user = self.get_object()  
@@ -36,7 +35,6 @@ class SignUpView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request, *args, **kwargs):
-        # Only for testing purposes, to see a form in the browser
         return Response({
             "username": "",
             "email": "",
@@ -63,29 +61,7 @@ class SignUpView(APIView):
             print("🚨 Server Error:", str(e))
             print(traceback.format_exc())
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-# class SignUpView(APIView):
-#     permission_classes = (AllowAny,)
-    
-#     def post(self, request, *args, **kwargs):
-#         print("Request received with data:", request.data)
-#         serializer = SignUpSerializer(data=request.data)
-        
-#         if serializer.is_valid():
-#             custom_user = serializer.save()            
-#             token, created = Token.objects.get_or_create(user=custom_user)
-            
-#             return Response({
-#                  "user": {
-#                     "username": custom_user.username,
-#                     "email": custom_user.email,
-#                     "phone": custom_user.phone,
-#                 },
-#                 "token": token.key,  
-#             }, status=status.HTTP_201_CREATED)
-
-#         print("Validation errors:", serializer.errors)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+ 
        
 class CheckEmailView(APIView):
     permission_classes = [AllowAny]  
@@ -104,8 +80,24 @@ class LoginView(APIView):
 
     def post(self, request, *args, **kwargs):
         data = request.data
+        print("🚨 Incoming Data:", data)
         email = data.get('email')
         password = data.get('password')
+
+        if email == "guest@example.com" and password == "guest":
+            guest_user = User.objects.filter(email="guest@example.com").first()
+            if not guest_user:
+                guest_user = User.objects.create_user(email="guest@example.com", password="guest", is_guest=True)
+            token, created = Token.objects.get_or_create(user=guest_user)
+            return Response({
+                "user": {
+                    "id": guest_user.id,
+                    "username": guest_user.username,
+                    "email": guest_user.email,
+                    # "phone": guest_user.phone,
+                },
+                "token": token.key,
+            }, status=status.HTTP_200_OK)
 
         if not email or not password:
             return Response({'error': 'Both email and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -122,18 +114,14 @@ class LoginView(APIView):
                 "id": user.id,
                 "username": user.username,
                 "email": user.email,
-                "phone": user.phone,
+                # "phone": user.phone,
             },
-            "token": token.key,  # Send the token to the frontend
+            "token": token.key,  
         }, status=status.HTTP_200_OK)
         
 
 
 
-class HelloView(APIView):
-    def get(self, request):
-        content = {'message': 'Hello, World!'}
-        return Response(content)
 
 
 

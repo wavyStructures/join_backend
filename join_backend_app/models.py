@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 import random
-# Get the custom user model
+
 User = get_user_model()
 
 def get_default_user():
@@ -19,13 +19,11 @@ def generate_random_color():
 class Contact(models.Model):
     username = models.CharField(max_length=100, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
-    email = models.CharField(max_length=60, blank=True, null=True)
-    # additional_info = models.CharField(max_length=255, blank=True, null=True)
+    email = models.CharField(max_length=60, blank=True, null=True, unique=True)
     contactColor = models.CharField(max_length=7, blank=True, null=True)  
     contact_is_a_user = models.BooleanField(default=True)
-    
+    is_public = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="contacts", default=get_default_user)
-    # assigned_to = models.ManyToManyField('self', symmetrical=False, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.contactColor:
