@@ -11,16 +11,22 @@ from user_auth_app.api.serializers import CustomUserSerializer, SignUpSerializer
 
 from django.contrib.auth import get_user_model
 
-User = get_user_model()
+User = get_user_model() 
+    
 
-class CustomUserListView(ListAPIView):
+class CustomUserListCreateView(generics.ListCreateAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]  
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return SignUpSerializer  
+        return CustomUserSerializer    
+    
 
 class CustomUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    # permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         user = self.get_object()  
@@ -57,9 +63,6 @@ class SignUpView(APIView):
                 }, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            import traceback
-            print("🚨 Server Error:", str(e))
-            print(traceback.format_exc())
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
  
        
@@ -80,7 +83,6 @@ class LoginView(APIView):
 
     def post(self, request, *args, **kwargs):
         data = request.data
-        print("🚨 Incoming Data:", data)
         email = data.get('email')
         password = data.get('password')
 

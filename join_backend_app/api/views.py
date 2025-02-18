@@ -44,36 +44,23 @@ class TaskListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         assigned_to = self.request.data.get('assigned_to', [])  
     
-        # valid_contacts = Contact.objects.filter(id__in=assigned_to)
-        
-        # if len(valid_contacts) != len(assigned_to):
-        #     raise ValidationError("Invalid contacts assigned.")
-
-        # task = serializer.save(owner=self.request.user)
-        # task.assigned_to.set(valid_contacts) 
-         # Check if assigned_to is not empty or None
         if not assigned_to:
-            # If empty, you could either set it to None, or leave it empty
             serializer.validated_data['assigned_to'] = []
             self.stdout.write(self.style.SUCCESS('No contacts assigned, leaving empty.'))
 
         else:
-            # Validate that the contacts exist in the database
             valid_contacts = Contact.objects.filter(id__in=assigned_to)
             if len(valid_contacts) != len(assigned_to):
                 raise ValidationError("Invalid contacts assigned.")
 
-            # Set the valid contacts to the task
             serializer.validated_data['assigned_to'] = valid_contacts
 
-        # Save the task with assigned contacts
         task = serializer.save(owner=self.request.user)
 
-        # Only set the valid contacts if assigned_to was provided correctly
         if assigned_to:
             task.assigned_to.set(valid_contacts)
         else:
-            task.assigned_to.clear()  # Optionally, clear if no contacts are assigned
+            task.assigned_to.clear()  
 
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TaskSerializer
