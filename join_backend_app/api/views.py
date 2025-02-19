@@ -2,7 +2,6 @@ from rest_framework import generics, permissions
 from .permissions import IsAuthenticatedOrGuest  
 from rest_framework.permissions import IsAuthenticated
 
-# from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -13,8 +12,6 @@ from user_auth_app.api.serializers import CustomUserSerializer
 from django.shortcuts import get_object_or_404
 
 from django.contrib.auth import get_user_model
-# from django.http import Http404
-# from django.db.models import Q
 
 
 User = get_user_model()
@@ -42,25 +39,18 @@ class TaskListCreateView(generics.ListCreateAPIView):
         return Task.objects.none()
     
     def perform_create(self, serializer):
-        assigned_to = self.request.data.get('assigned_to', [])  
+        user = self.request.user
+        assigned_to_ids = self.request.data.get('assigned_to', [])  
     
-        if not assigned_to:
-            serializer.validated_data['assigned_to'] = []
-            self.stdout.write(self.style.SUCCESS('No contacts assigned, leaving empty.'))
+        valid_contacts = list(Contact.objects.filter(id__in=assigned_to_ids))
+        
+        owner_contact = Contact.objects.filter(email=user.email).first()
+        if owner_contact and owner_contact not in valid_contacts:
+            valid_contacts.append(owner_contact)
+  
+        task = serializer.save(owner=user)
+        task.assigned_to.set(valid_contacts)
 
-        else:
-            valid_contacts = Contact.objects.filter(id__in=assigned_to)
-            if len(valid_contacts) != len(assigned_to):
-                raise ValidationError("Invalid contacts assigned.")
-
-            serializer.validated_data['assigned_to'] = valid_contacts
-
-        task = serializer.save(owner=self.request.user)
-
-        if assigned_to:
-            task.assigned_to.set(valid_contacts)
-        else:
-            task.assigned_to.clear()  
 
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TaskSerializer

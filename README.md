@@ -38,7 +38,7 @@ These instructions will help you set up and run the project on your local machin
 
    ```bash
    python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   source venv/Scripts/activate  # On Mac use `venv/bin/activate`
    ```
 
 3. **Install the required packages:**

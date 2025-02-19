@@ -15,6 +15,19 @@ class TaskSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("One or more assigned contacts do not exist.")
     
         return value
+    
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['owner'] = request.user
+
+        # assigned_contacts = validated_data.pop('assigned_to', [])
+        assigned_contacts = validated_data.get('assigned_to', [])
+        
+        owner_contact = Contact.objects.filter(email=request.user.email).first()
+        if owner_contact and owner_contact not in assigned_contacts:
+            assigned_contacts.append(owner_contact)
+
+        return super().create(validated_data)
         
     class Meta:
         model = Task
