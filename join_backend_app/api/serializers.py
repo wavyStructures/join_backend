@@ -20,9 +20,8 @@ class TaskSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         validated_data['owner'] = request.user
 
-        # assigned_contacts = validated_data.pop('assigned_to', [])
         assigned_contacts = validated_data.get('assigned_to', [])
-        
+       
         owner_contact = Contact.objects.filter(email=request.user.email).first()
         if owner_contact and owner_contact not in assigned_contacts:
             assigned_contacts.append(owner_contact)
